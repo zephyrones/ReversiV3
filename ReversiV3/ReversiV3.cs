@@ -1,19 +1,21 @@
 using System;
+using System.Diagnostics;
 using System.Drawing;
 using System.Windows.Forms;
 
 Application.Run(new Speelbord());
 
-class Speelbord : Form 
+class Speelbord : Form
 {
     public int Midden_x = 150; // midden van het label (voor 6x6 is dat 300/2)
     public int Midden_y = 150;
     public int n = 6; //veldsize
     public int[,] spelArray;
     public Label afbeelding = new Label();
+    public int PlayerOne = 1;
+    public int PlayerTwo = 2;
 
 
-   
     public Speelbord()
     { // label maken
       // this.Size = new Size(500, 500);
@@ -28,11 +30,7 @@ class Speelbord : Form
         afbeelding.BackColor = Color.White;
 
         afbeelding.Paint += tekenSpeelbord;
-        afbeelding.Paint += tekenSteenB;
-        afbeelding.Paint += tekenSteenR;
-
-
-
+        afbeelding.Paint += Array;
     }
 
     public void tekenSpeelbord(object o, PaintEventArgs pea) // vakje is 50 x 50
@@ -55,49 +53,65 @@ class Speelbord : Form
      * Dan kijken we hoe vaak het in 50 past (aka onze vakjes) en dan max n*50 (en niet in de min) 
      */
 
-    public void tekenSteenB(object o, PaintEventArgs pea)
+
+    // public void tekenSteenB(object o, PaintEventArgs pea)
+    // {
+    //    Graphics gr = pea.Graphics;
+    //    gr.FillEllipse(Brushes.Blue, 60, 60, 50, 50);
+    // }
+
+    // public void tekenSteenR(object o, PaintEventArgs pea)
+    //  {
+    //      Graphics gr = pea.Graphics;
+    //      gr.FillEllipse(Brushes.Red, 150, 150, 50, 50);
+    // }
+    int MousePosX(object o, MouseEventArgs mea)
     {
-        Graphics gr = pea.Graphics;
-        gr.FillEllipse(Brushes.Blue, 60, 60, 50, 50);
+        int x = mea.X / 50;
+        return x;
+    }
+    int MousePosY(object o, MouseEventArgs mea)
+    {
+        int y = mea.Y / 50;
+        return y;
     }
 
-    public void tekenSteenR(object o, PaintEventArgs pea)
+
+    void Array(object o, PaintEventArgs pea) // n x n array
     {
-        Graphics gr = pea.Graphics;
-        gr.FillEllipse(Brushes.Red, 150, 150, 50, 50);
-    }
+        spelArray = new int[n, n];
 
-
-    public void Array() // n x n array
-    { 
-    spelArray = new int[n, n];  
-
-    for (int i = 0; i<n; i++) // maakt een nul-array
+        for (int i = 0; i < n; i++) // maakt een nul-array
         {
-          for(int j = 0; j<n; j++)
+            for (int j = 0; j < n; j++)
             {
                 spelArray[i, j] = 0;
             }
         }
 
-    spelArray[3, 3] = 1; // overschrijft waarde van de array!
-    spelArray[4, 4] = 1;
-    spelArray[3, 4] = 2;
-    spelArray[4, 3] = 2;
+        spelArray[3, 3] = 1; // overschrijft waarde van de array!
+        spelArray[4, 4] = 1;
+        spelArray[3, 4] = 2;
+        spelArray[4, 3] = 2;
     }
+
+
 
 
     // mouse click event maken, als je klikt dan leest ie x en y coordinaten af, en dan met de afronding iets leuks doen
     // 40 en 35 bijv is dan [1,1] 
     // i en j x 50 (grootte van vakje)
 
-}
 
-class Stenen
-{
-    public void tekenSteen(object o, PaintEventArgs pea)
+    class Stenen
     {
-        Graphics gr = pea.Graphics;
-        gr.FillEllipse(Brushes.Indigo, 20, 20, 50, 50);
+        public void tekenSteen(object o, PaintEventArgs pea)
+        {
+            Graphics gr = pea.Graphics;
+            gr.FillEllipse(Brushes.Indigo, 20, 20, 50, 50);
+        }
     }
 }
+
+
+
