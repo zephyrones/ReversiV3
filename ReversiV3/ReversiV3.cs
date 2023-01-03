@@ -6,11 +6,10 @@ Application.Run(new Speelbord());
 
 class Speelbord : Form 
 {
-    public int Midden_x = 200;
-    public int Midden_y = 200;
+    public int Midden_x = 150; // midden van het label (voor 6x6 is dat 300/2)
+    public int Midden_y = 150;
     public int n = 6; //veldsize
     public int[,] spelArray;
-    public Form scherm = new Form();
     public Label afbeelding = new Label();
 
 
@@ -23,16 +22,15 @@ class Speelbord : Form
       //this.Paint += this.tekenSteenB;
       // this.Paint += this.tekenSteenR;
 
-        scherm.Text = "Stink Reversi!";
-        scherm.BackColor = Color.LightPink;
-        scherm.ClientSize = new Size(650, 650);
-
-        scherm.Controls.Add(afbeelding);
-        afbeelding.Location = new Point(10, 10);
-        afbeelding.Size = new Size(400, 400);
+        Controls.Add(afbeelding);
+        afbeelding.Location = new Point(100, 100);
+        afbeelding.Size = new Size(301, 301); // voor pixels dat alles er op komt
         afbeelding.BackColor = Color.White;
 
         afbeelding.Paint += tekenSpeelbord;
+        afbeelding.Paint += tekenSteenB;
+        afbeelding.Paint += tekenSteenR;
+
 
 
     }
