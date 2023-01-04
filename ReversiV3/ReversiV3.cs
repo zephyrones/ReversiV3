@@ -1,6 +1,7 @@
 using System;
 using System.Diagnostics;
 using System.Drawing;
+using System.Numerics;
 using System.Windows.Forms;
 
 Application.Run(new Speelbord());
@@ -15,27 +16,26 @@ class Speelbord : Form
     
     public int CountPlayerOne;
     public int CountPlayerTwo;
-    public int CurrentPlayer = 1; //  player 1 -> colour : red 
-    public int WaitingPlayer = 2; //  player 2 -> colour : blue
+    int CurrentPlayer = 1; //  player 1 -> colour : red 
+    int WaitingPlayer = 2; //  player 2 -> colour : blue
+    int TempWaitingPlayer;
+    int TempCurrentPlayer;
+
 
 
     public Speelbord()
     {
-        // label maken
-        // this.Size = new Size(500, 500);
-        //this.BackColor = Color.White;
-        //this.Paint += this.tekenSpeelbord;
-        //this.Paint += this.tekenSteenB;
-        // this.Paint += this.tekenSteenR;
-
+  
         Controls.Add(afbeelding);
         afbeelding.Location = new Point(100, 100);
         afbeelding.Size = new Size(301, 301); // voor pixels dat alles er op komt
         afbeelding.BackColor = Color.White;
 
         afbeelding.Paint += SetArray;
-        afbeelding.Paint += tekenSpeelbord;
-       
+        afbeelding.MouseClick += BoardPosition;
+        afbeelding.Paint += TekenSpeelbord;
+   
+
     }
 
 
@@ -52,10 +52,12 @@ class Speelbord : Form
         }
 
         // places down the 4 stones on the board.
+        // arrays start from 0.
         spelArray[3, 3] = 1;
         spelArray[2, 2] = 1;
         spelArray[2, 3] = 2;
         spelArray[3, 2] = 2;
+  
 
         // Counts the starting stones on the board.
         CountPlayerOne = 2;
@@ -65,9 +67,16 @@ class Speelbord : Form
     // Swaps who is currently playing.
     public void ChangePlayer(int CurrentPlayer, int WaitingPlayer)
     {
-        CurrentPlayer = WaitingPlayer;
-        WaitingPlayer = CurrentPlayer;
+        TempWaitingPlayer = CurrentPlayer;
+        TempCurrentPlayer = WaitingPlayer;
     }
+
+    // Sets the position to the place the CurrentPlayer selected.
+   // public void PlaceStones(int x, int y, int Player)
+   // {
+      //  spelArray[x, y] = Player; // set it to two to see if it even works LOL
+        
+   // }
 
     // Gets the position of the mouse to know where to place a stone.
     public void BoardPosition(object o, MouseEventArgs mea)
@@ -77,19 +86,30 @@ class Speelbord : Form
         int x = mea.X / 50;
         int y = mea.Y / 50;
 
-        PlaceStones(x, y, CurrentPlayer);
+        afbeelding.Invalidate();
+        spelArray[x, y] = 2;
+        afbeelding.Invalidate();
+
+        // prints the value of x and y on console to see if they are correct for the array.
+        Debug.WriteLine(x);
+        Debug.WriteLine(y);
+      
+        // PlaceStones(x, y, CurrentPlayer);
+
         
-        this.Invalidate();
+
+        ChangePlayer(CurrentPlayer, WaitingPlayer);
+      
     }
+
+ 
 
     // Puts down a stone for the player who's turn it is.
-    public void PlaceStones(int x, int y, int Player)
-    {
-        spelArray[x, y] = Player;
-    }
 
-    public void tekenSpeelbord(object o, PaintEventArgs pea)
+
+    public void TekenSpeelbord(object o, PaintEventArgs pea)
     {
+ 
         Graphics gr = pea.Graphics;
         for (int i = 0; i < n; i++)
         {
@@ -101,7 +121,7 @@ class Speelbord : Form
                 // the size of a rectangle is 50 by 50.
             }
         }
-                for (int i = 0; i < n; i++) // maakt een nul-array
+                for (int i = 0; i < n; i++) // places the stones in position
                 {
                     for (int j = 0; j < n; j++)
                     {
@@ -117,25 +137,6 @@ class Speelbord : Form
                 }
             }
         }
-   
-
-
-
-    // mouse click event maken, als je klikt dan leest ie x en y coordinaten af, en dan met de afronding iets leuks doen
-    // 40 en 35 bijv is dan [1,1] 
-    // i en j x 50 (grootte van vakje)
-
-//  public void tekenSteenB(object o, PaintEventArgs pea)
-// {
-//     Graphics gr = pea.Graphics;
-//     gr.FillEllipse(Brushes.Blue, x, y, 50, 50);
-// }
-
-// public void tekenSteenR(object o, PaintEventArgs pea)
-//    {
-//       Graphics gr = pea.Graphics;
-//       gr.FillEllipse(Brushes.Red, x, y, 50, 50);
-//  }
 
 
 
