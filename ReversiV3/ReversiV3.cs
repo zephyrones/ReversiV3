@@ -67,6 +67,13 @@ class Speelbord : Form
         TempCurrentPlayer = WaitingPlayer;
     }
 
+
+    public void PlaceStones(int x, int y, int Player)
+    {
+        spelArray[x, y] = 2; //Player; // set it to 2 to see if it even works LOL
+        Debug.WriteLine(spelArray[x, y]);
+    }
+
     // Gets the position of the mouse to know where to place a stone.
     public void BoardPosition(object o, MouseEventArgs mea)
     {
@@ -74,9 +81,10 @@ class Speelbord : Form
         // gets the location of where the mouse is, which we combine with a MouseClick to place the stone
          int x = mea.X / 50;
          int y = mea.Y / 50;
-        spelArray[x, y] = 2;
-        afbeelding.Invalidate();
+        //  spelArray[x, y] = 2;
+        //  afbeelding.Invalidate();
 
+        PlaceStones(x, y, CurrentPlayer);
 
         // prints the value of x and y on console to see if they are correct for the array.
         Debug.WriteLine($"Value of spelArray[x,y]: {spelArray[x,y]}");
@@ -93,11 +101,7 @@ class Speelbord : Form
       
     }
 
-    public void PlaceStones(int x, int y, int Player)
-    {
-        spelArray[x, y] = 2; //Player; // set it to 2 to see if it even works LOL
-        Debug.WriteLine(spelArray[x, y]);
-    }
+
 
     // draws the game board and stones on the clicked positions
     public void TekenSpeelbord(object o, PaintEventArgs pea)
