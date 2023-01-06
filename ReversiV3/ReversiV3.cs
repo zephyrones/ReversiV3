@@ -24,13 +24,13 @@ class Speelbord : Form
 
     public int CountPlayerOne;
     public int CountPlayerTwo;
-    int CurrentPlayer = 1; //  player 1 -> colour : red 
-    int WaitingPlayer = 2; //  player 2 -> colour : blue
-    int TempWaitingPlayer;
-    int TempCurrentPlayer;
+    bool CurrentPlayer = false; //  player 1 -> colour : red // false is rood
+     //  player 2 -> colour : blue // true is blauw
+
 
     public Speelbord()
     {
+
         Controls.Add(afbeelding);
         afbeelding.Location = new Point(100, 100);
         afbeelding.Size = new Size(BoardX, BoardY); // voor pixels dat alles er op komt
@@ -46,6 +46,8 @@ class Speelbord : Form
         nieuw_spel.Size = new Size(80, 30);
         nieuw_spel.Text = "Nieuw spel";
 
+        // region = buttons! 
+        #region
         Controls.Add(zes);
         zes.Location = new Point(10, 50);
         zes.Size = new Size(50, 30);
@@ -57,22 +59,26 @@ class Speelbord : Form
         acht.Text = "8x8";
 
         Controls.Add(tien);
-        tien.Location = new Point(100, 50);
+        tien.Location = new Point(110, 50);
         tien.Size = new Size(50, 30);
         tien.Text = "10x10";
+        #endregion
 
+       
+        SetArray();
         zes.Click += ButtonZes;
         acht.Click += ButtonAcht;
         tien.Click += ButtonTien;
-        afbeelding.Paint += SetArray;
-        afbeelding.Paint += TekenSpeelbord;
         afbeelding.MouseClick += BoardPosition;
-        
+        afbeelding.Paint += TekenSpeelbord;
+       
+
 
         // afbeelding.Invalidate();
-       
+
     }
-     void ButtonZes(object o, EventArgs ea)
+   
+    void ButtonZes(object o, EventArgs ea)
     {
         n = 6;
         BoardX = n * 50 + 1;
@@ -80,7 +86,8 @@ class Speelbord : Form
         Midden_x = 150;
         Midden_y = 150;
         afbeelding.Size = new Size(BoardX, BoardY);
-        afbeelding.Invalidate();
+        SetArray();
+
     }
 
     void ButtonAcht(object o, EventArgs ea)
@@ -91,7 +98,7 @@ class Speelbord : Form
         Midden_x = 200;
         Midden_y = 200;
         afbeelding.Size = new Size(BoardX, BoardY);
-        afbeelding.Invalidate();
+        SetArray();
     }
 
     void ButtonTien(object o, EventArgs ea)
@@ -102,13 +109,15 @@ class Speelbord : Form
         Midden_x = 250;
         Midden_y = 250;
         afbeelding.Size = new Size(BoardX, BoardY);
-        afbeelding.Invalidate();
+        SetArray();
     }
-    public void SetArray(object o, PaintEventArgs pea) // n x n array
+ 
+    public void SetArray() // n x n array
     {
         spelArray = new int[n, n];
-     
-        for (int i = 0; i < n; i++) // maakt een nul-array
+
+        // we make a zero-array as our starting point. 
+        for (int i = 0; i < n; i++) 
         {
             for (int j = 0; j < n; j++)
             {
@@ -116,56 +125,63 @@ class Speelbord : Form
             }
         }
 
-        // places down the 4 stones on the board.
-        // arrays start from 0.
-        spelArray[n/2 , n/2] = 1;
-        spelArray[n / 2 - 1, n /2 -1] = 1;
-        spelArray[n / 2 -1, n/2] = 2;
-        spelArray[n /2 , n / 2 -1] = 2;
-        
+        // places down the four starting stones in their respective positions.
+        spelArray[n / 2, n / 2] = 1;
+        spelArray[n / 2 - 1, n / 2 - 1] = 1;
+        spelArray[n / 2 - 1, n / 2] = 2;
+        spelArray[n / 2, n / 2 - 1] = 2;
+
 
         // Counts the starting stones on the board.
         CountPlayerOne = 2;
         CountPlayerTwo = 2;
+
+        afbeelding.Invalidate();
     }
 
     // Swaps who is currently playing. (review this laterrr)
-    public void ChangePlayer(int CurrentPlayer, int WaitingPlayer)
+    public void ChangePlayer()
     {
-        TempWaitingPlayer = CurrentPlayer;
-        TempCurrentPlayer = WaitingPlayer;
+        CurrentPlayer = !CurrentPlayer; 
     }
 
 
-    public void PlaceStones(int x, int y, int Player)
+    public void PlaceStones(int x, int y, bool CurrentPlayer)
     {
-        spelArray[x, y] = 2; //Player; // set it to 2 to see if it even works LOL
-    }
+        spelArray[x, y] = CurrentPlayer ? 1 : 2; //Player; // set it to 2 to see if it even works LOL
+    } // If current player == true, dan is het 1, en als false dan 2. 
 
     // Gets the position of the mouse to know where to place a stone.
-    public void BoardPosition(object o, MouseEventArgs mea)
+    public void BoardPosition(object sender, MouseEventArgs mea)
     {
         // divided by pixels because each square is 50 by 50, so then you get 1 until n again.
         // gets the location of where the mouse is, which we combine with a MouseClick to place the stone
-         int x = mea.X / 50;
-         int y = mea.Y / 50;
-        //  spelArray[x, y] = 2;
-        //  afbeelding.Invalidate();
+        int x = mea.X / 50;
+        int y = mea.Y / 50;
 
-        PlaceStones(x, y, CurrentPlayer);
+        if (isLegalMove(x, y, CurrentPlayer) == true)
+            PlaceStones(x, y, CurrentPlayer);
+        else
+            ;
 
+        // region just prints the values to console. 
+        #region
         // prints the value of x and y on console to see if they are correct for the array.
-        Debug.WriteLine($"Value of spelArray[x,y]: {spelArray[x,y]}");
+        Debug.WriteLine($"Value of spelArray[x,y]: {spelArray[x, y]}");
         Debug.WriteLine($"This is x: {x}");
         Debug.WriteLine($"This is y: {y}");
-        for (int i = 0; i<n; i++) // just prints every value in the array to check what happens
+
+        for (int i = 0; i < n; i++) // just prints every value in the array to check what happens
         {
-            for (int j = 0; j<n; j++)
+            for (int j = 0; j < n; j++)
             {
                 Debug.WriteLine($"This is je value for {i} and {j}: {spelArray[i, j]}");
             }
         }
-        ChangePlayer(CurrentPlayer, WaitingPlayer);
+        #endregion
+
+        ChangePlayer();
+        afbeelding.Invalidate();
     }
 
     // draws the game board and stones on the clicked positions
@@ -199,70 +215,52 @@ class Speelbord : Form
             }
         }
     }
-       bool isLegalMove(int x, int y, int CurrentPlayer)
-       {
+    bool isLegalMove(int x, int y, bool CurrentPlayer) // needs reviewing 
+    {
         /* to see if a move is legal, it needs to block an enemy piece in, 
          * you need to check in all 3 directions: horizontal (x+-), vertical(y+-), diagonal(xy+-).
          * it needs to then have at least 1 enemy piece in the "middle" and 
          * one of your pieces next to it. 
          * we do this using if statements?
          */
+        int RIGHT = spelArray[x + 1, y];
+        int LEFT = spelArray[x - 1, y];
+        int DIAGONALUPRIGHT = spelArray[x + 1, y + 1];
+        int DIAGONALDOWNRIGHT = spelArray[x + 1, y - 1];
+        int DIAGONALDOWNLEFT = spelArray[x - 1, y + 1];
+        int DIAGONALUPLEFT = spelArray[x - 1, y - 1];
+        int UP = spelArray[x, y - 1];
+        int DOWN = spelArray[x, y + 1];
+
+
+        // determine if the field is empty
+        if (spelArray[x, y] != 0)
+        {
+            return false;
+        }
 
         // determine which 'number' is your enemy
-        int EnemyPlayer;
 
-            if (CurrentPlayer == 1)
-            {
-                EnemyPlayer = 2;
-            }
-            else
-                EnemyPlayer = 1;
-
-            // determine if the field is empty
-            if (spelArray[x, y] != 0)
-            {
-                return false;
-            }
-
-            // determine if there is an enemy stone in each direction
-            for (int i = 0; i <= n - 1; i++)
-            {
-                for (int j = 0; j <= n - 1; j++)
-                {
-                int row = x + i;
-                int col = y + j;
-
-                    if (row >= 0 && row > n && col >= 0 && col > n && spelArray[row, col] == EnemyPlayer)
-                {
-                    while (true)
-                    {
-                        row += i;
-                        col += j;
-
-                        if (row < 0 || row >= n || col < 0 || col >= n)
-                        {
-                            break;
-                        }
-
-                        if (spelArray[row, col] == 0)
-                        {
-                            break;
-                        }
-
-                        if (spelArray[row, col] == CurrentPlayer)
-                        {
-                            return true; 
-                        }
-                    }
-                }
+        int EnemyPlayer = CurrentPlayer ? 2 : 1;
+        Debug.WriteLine("This is current" + CurrentPlayer);
+        Debug.WriteLine("This is enemy" + EnemyPlayer);
 
 
-                }
-            }
-            return false; 
-       }
+        // determine if there is an enemy stone in each direction
+        if (UP == EnemyPlayer || DOWN == EnemyPlayer || RIGHT == EnemyPlayer || LEFT == EnemyPlayer || DIAGONALUPRIGHT == EnemyPlayer
+            || DIAGONALDOWNRIGHT == EnemyPlayer || DIAGONALUPLEFT == EnemyPlayer || DIAGONALDOWNLEFT == EnemyPlayer)
+            return true;
+        else
+            return false;
 
-}
+        // rn if u chose a field on the outer ring it says out of bounds so
+        // fix that so it just says ok me no work then but no crash
+
+
+       
+    }
+
+    }
 
 
 
