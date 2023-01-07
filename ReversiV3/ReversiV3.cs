@@ -14,7 +14,6 @@ class Speelbord : Form
     public int BoardX = 401;
     public int BoardY = 401;
 
-
     public Label afbeelding = new Label();
     public Button help = new Button();
     public Button nieuw_spel = new Button();
@@ -62,18 +61,19 @@ class Speelbord : Form
         tien.Location = new Point(110, 50);
         tien.Size = new Size(50, 30);
         tien.Text = "10x10";
+
+  
         #endregion
 
-       
+
         SetArray();
         zes.Click += ButtonZes;
         acht.Click += ButtonAcht;
         tien.Click += ButtonTien;
+        nieuw_spel.Click += ButtonNieuwSpel;
         afbeelding.MouseClick += BoardPosition;
         afbeelding.Paint += TekenSpeelbord;
-       
-
-
+   
         // afbeelding.Invalidate();
 
     }
@@ -111,6 +111,12 @@ class Speelbord : Form
         afbeelding.Size = new Size(BoardX, BoardY);
         SetArray();
     }
+
+    void ButtonNieuwSpel(object o, EventArgs ea)
+    {
+        SetArray();
+        // afbeelding.Invalidate();
+    }
  
     public void SetArray() // n x n array
     {
@@ -144,7 +150,6 @@ class Speelbord : Form
     {
         CurrentPlayer = !CurrentPlayer; 
     }
-
 
     public void PlaceStones(int x, int y, bool CurrentPlayer)
     {
@@ -255,8 +260,6 @@ class Speelbord : Form
 
         // rn if u chose a field on the outer ring it says out of bounds so
         // fix that so it just says ok me no work then but no crash
-
-
        
     }
 
