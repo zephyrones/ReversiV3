@@ -281,7 +281,7 @@ class Speelbord : Form
         }
         else
 
-        return true; // zodat ie niet piiept
+        return false; // zodat ie niet piiept
     }
 
     bool FindPlayer(int x, int y, int row, int col, int EnemyPlayer)
