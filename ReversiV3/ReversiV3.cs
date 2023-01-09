@@ -23,8 +23,11 @@ class Speelbord : Form
 
     public int CountPlayerOne;
     public int CountPlayerTwo;
-    bool CurrentPlayer = false; //  player 1 -> colour : red // false is rood
-                                //  player 2 -> colour : blue // true is blauw
+
+    public int CurrentPlayer = 1;
+    public int EnemyPlayer = 2; 
+    //  player 1 -> colour : red // false is rood
+    //  player 2 -> colour : blue // true is blauw
 
 
     public Speelbord()
@@ -86,6 +89,8 @@ class Speelbord : Form
         BoardY = n * 50 + 1;
         Midden_x = 150;
         Midden_y = 150;
+        CurrentPlayer = 1;
+        EnemyPlayer = 2;
         afbeelding.Size = new Size(BoardX, BoardY);
         SetArray();
 
@@ -98,6 +103,8 @@ class Speelbord : Form
         BoardY = n * 50 + 1;
         Midden_x = 200;
         Midden_y = 200;
+        CurrentPlayer = 1;
+        EnemyPlayer = 2;
         afbeelding.Size = new Size(BoardX, BoardY);
         SetArray();
     }
@@ -109,16 +116,24 @@ class Speelbord : Form
         BoardY = n * 50 + 1;
         Midden_x = 250;
         Midden_y = 250;
+        CurrentPlayer = 1;
+        EnemyPlayer = 2;
         afbeelding.Size = new Size(BoardX, BoardY);
         SetArray();
     }
 
     void ButtonNieuwSpel(object o, EventArgs ea)
     {
+        CurrentPlayer = 1;
+        EnemyPlayer = 2;
         SetArray();
         // afbeelding.Invalidate();
     }
 
+    void ButtonHelp(object o, EventArgs ea)
+    {
+        
+    }
     public void SetArray() // n x n array
     {
         spelArray = new int[n, n];
@@ -147,15 +162,29 @@ class Speelbord : Form
     }
 
     // Swaps who is currently playing. (review this laterrr)
-    public void ChangePlayer()
+    public void ChangePlayer(int CurrentPlayerT, int EnemyPlayerT)
     {
-        CurrentPlayer = !CurrentPlayer;
+       if (CurrentPlayer == 1)
+        {
+            CurrentPlayer = EnemyPlayer;
+        }
+       else if (CurrentPlayer == 2)
+        {
+            CurrentPlayer = 1;
+        }
     }
 
-    public void PlaceStones(int x, int y, bool CurrentPlayer)
+    public void PlaceStones(int x, int y, int row, int col)
     {
-        spelArray[x, y] = CurrentPlayer ? 1 : 2; //Player; // set it to 2 to see if it even works LOL
-    } // If current player == true, dan is het 1, en als false dan 2. 
+   
+        if (spelArray[x,y] != CurrentPlayer) // Checks if the place isn't already occupied by the player.
+        {
+            spelArray[x, y] = CurrentPlayer;
+            PlaceStones(x + row, y + col, row, col); // places ston
+        }
+        
+        
+    } 
 
     // Gets the position of the mouse to know where to place a stone.
     public void BoardPosition(object sender, MouseEventArgs mea)
@@ -164,12 +193,6 @@ class Speelbord : Form
         // gets the location of where the mouse is, which we combine with a MouseClick to place the stone
         int x = mea.X / 50;
         int y = mea.Y / 50;
-
-       if (isLegalMove(x, y, CurrentPlayer) == true)
-            PlaceStones(x, y, CurrentPlayer);
-        else
-            Debug.WriteLine("DIT GEEFT DUS FALSE AAN HAHA");
-     
 
         // region just prints the values to console. 
         #region
@@ -187,7 +210,15 @@ class Speelbord : Form
         }
         #endregion
 
-        ChangePlayer();
+        if (isLegalMove(x, y))
+        {
+            spelArray[x,y] = CurrentPlayer;
+            EntrapmentFinder(x, y);
+            ChangePlayer(CurrentPlayer, EnemyPlayer);
+            afbeelding.Invalidate();
+        }
+
+      
         afbeelding.Invalidate();
     }
 
@@ -221,95 +252,88 @@ class Speelbord : Form
                 }
             }
         }
-    }
-    bool isLegalMove(int x, int y, bool CurrentPlayer) // needs reviewing 
-    {
-        /* to see if a move is legal, it needs to block an enemy piece in, 
-         * you need to check in all 3 directions: horizontal (x+-), vertical(y+-), diagonal(xy+-).
-         * it needs to then have at least 1 enemy piece in the "middle" and 
-         * one of your pieces next to it. 
-         * we do this using if statements?
-         */
 
-        // determine if the field is empty
-        if (spelArray[x, y] != 0)
+        if (ShowMeHelp() == true)
         {
+            ;
+        }
+      
+    }
+    
+    bool isLegalMove(int x, int y) // needs reviewing 
+    { 
+
+        if (spelArray[x, y] != 0) // if there is a stone on the board you cannot place another stone.
             return false;
-        }
-
-        // determine which 'number' is your enemy
-
-        int EnemyPlayer = CurrentPlayer ? 2 : 1;
-
-        Debug.WriteLine("This is current" + CurrentPlayer);
-        Debug.WriteLine("This is enemy" + EnemyPlayer);
-
-        // determine if you are placing your stone next to an enemy stone.
         for (int row = -1; row <= 1; row++)
-        {
             for (int col = -1; col <= 1; col++)
-            {
-                if (row == 0 && col == 0)
-                    return false;
-                else
-                    return FindEnemy(x + row, y + col, row, col, EnemyPlayer);
+                if (!(row == 0 && col == 0))
+                    if (FindEnemy(x + row, y + col, row, col))
+                        return true;
+        return false;
 
-            }
-        }
-
-        // determine if there is an enemy stone in each direction
-
-
-        // rn if u chose a field on the outer ring it says out of bounds so
-        // fix that so it just says ok me no work then but no crash
-        return false; // just so it dun crash
     }
 
-    bool FindEnemy(int x, int y, int row, int col, int EnemyPlayer, bool EnemyStone = false, bool YourStone = true)
+    // Finds the stones that are entrapped and flips them to the correct color.
+    public void EntrapmentFinder(int x, int y)
     {
-        // searches inside of the field size, else it won't work.
+        for (int row = -1; row <= 1; row++)
+            for (int col = -1; col <= 1; col++)
+                if (!(row == 0 && col == 0))
+                   FindEnemy(x + row, y + col, row, col, true);
+    }
+
+    bool FindEnemy(int x, int y, int row, int col, bool PlayStone = false, bool BadStone = true)
+    {
+        // Checks if the direction is still part of the game field.
         if (x < 0 || y < 0 || x >= n || y >= n)
         {
             return false;
         }
 
-        if (spelArray[x,y] == EnemyPlayer)
+       
+        if (spelArray[x, y] == CurrentPlayer) // Returns false if your own stone is right next to you.
         {
-            x = x + row;
-            y = y + col;
-            return FindPlayer(x, y, row, col, EnemyPlayer);
+            {
+                if (BadStone == true) // 
+                    return false;
+            }
+
+            if (PlayStone) // There is an enemy stone there.
+            {
+                PlaceStones(-1 * row + x, -1 * col + y, -1 * row, -1 * col);
+            }
+            return true;
         }
         else
-
-        return false; // zodat ie niet piiept
-    }
-
-    bool FindPlayer(int x, int y, int row, int col, int EnemyPlayer)
-    {
-        if (spelArray[x, y] == EnemyPlayer)
         {
+            if (spelArray[x, y] == 0) // If there's no stone next to it you cannot entrap a stone.
+            {
+                return false;
+            }
+            
+            // Checks the next space if there is an enemy stone next to you.
             x = x + row;
-            y = y + col;
-            FindPlayer(x, y, row, col, EnemyPlayer);
-            return true;
+            y = y  + col;
+
+            return FindEnemy(x, y, row, col, PlayStone, false);
         }
-       
-        if (spelArray[x, y] != EnemyPlayer) 
-        {
-            return true;
-        }
-      else
-        {
-            return false;
-        }
-      
     }
 
-
+    public bool ShowMeHelp()
+    {
+        for (int r = 0; r < n; r++)
+            for (int c = 0; c < n; c++)
+                if (spelArray[r, c] == 0)
+                { 
+                    isLegalMove(r, c);
+                     return true;
+                }
+                
+        return false;
+    }
 }
     
-
-
 
  
 
