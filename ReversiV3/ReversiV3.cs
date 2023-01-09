@@ -252,7 +252,7 @@ class Speelbord : Form
                 if (row == 0 && col == 0)
                     return false;
                 else
-                    FindEnemy(x + row, y + col, row, col, EnemyPlayer);
+                    return FindEnemy(x + row, y + col, row, col, EnemyPlayer);
 
             }
         }
@@ -262,7 +262,7 @@ class Speelbord : Form
 
         // rn if u chose a field on the outer ring it says out of bounds so
         // fix that so it just says ok me no work then but no crash
-        return true; // just so it dun crash
+        return false; // just so it dun crash
     }
 
     bool FindEnemy(int x, int y, int row, int col, int EnemyPlayer, bool EnemyStone = false, bool YourStone = true)
