@@ -29,7 +29,7 @@ class Speelbord : Form
 
     public Speelbord()
     {
-
+        #region
         Controls.Add(afbeelding);
         afbeelding.Location = new Point(100, 100);
         afbeelding.Size = new Size(BoardX, BoardY); // voor pixels dat alles er op komt
@@ -44,6 +44,7 @@ class Speelbord : Form
         nieuw_spel.Location = new Point(60, 10);
         nieuw_spel.Size = new Size(80, 30);
         nieuw_spel.Text = "Nieuw spel";
+        #endregion
 
         // region = buttons! 
         #region
@@ -167,7 +168,7 @@ class Speelbord : Form
         if (isLegalMove(x, y, CurrentPlayer) == true)
             PlaceStones(x, y, CurrentPlayer);
         else
-            ;
+            Debug.WriteLine("DIT GEEFT DUS FALSE AAN HAHA");
 
         // region just prints the values to console. 
         #region
@@ -228,16 +229,7 @@ class Speelbord : Form
          * one of your pieces next to it. 
          * we do this using if statements?
          */
-        int RIGHT = spelArray[x + 1, y];
-        int LEFT = spelArray[x - 1, y];
-        int DIAGONALUPRIGHT = spelArray[x + 1, y + 1];
-        int DIAGONALDOWNRIGHT = spelArray[x + 1, y - 1];
-        int DIAGONALDOWNLEFT = spelArray[x - 1, y + 1];
-        int DIAGONALUPLEFT = spelArray[x - 1, y - 1];
-        int UP = spelArray[x, y - 1];
-        int DOWN = spelArray[x, y + 1];
-
-
+         
         // determine if the field is empty
         if (spelArray[x, y] != 0)
         {
@@ -247,23 +239,82 @@ class Speelbord : Form
         // determine which 'number' is your enemy
 
         int EnemyPlayer = CurrentPlayer ? 2 : 1;
+       
         Debug.WriteLine("This is current" + CurrentPlayer);
         Debug.WriteLine("This is enemy" + EnemyPlayer);
 
+        // determine if you are placing your stone next to an enemy stone.
+        for (int row = -1; row <= 1; row++)
+        {   
+            for (int col = -1; col <= 1; col++)
+            {
+                if (row == 0 && col == 0)
+                    return false;
+                else
+                    FindEnemy(x + row, y + col, row, col, EnemyPlayer);
+                    
+            }
+        }
 
         // determine if there is an enemy stone in each direction
-        if (UP == EnemyPlayer || DOWN == EnemyPlayer || RIGHT == EnemyPlayer || LEFT == EnemyPlayer || DIAGONALUPRIGHT == EnemyPlayer
-            || DIAGONALDOWNRIGHT == EnemyPlayer || DIAGONALUPLEFT == EnemyPlayer || DIAGONALDOWNLEFT == EnemyPlayer)
-            return true;
-        else
-            return false;
+        
 
         // rn if u chose a field on the outer ring it says out of bounds so
         // fix that so it just says ok me no work then but no crash
-       
+        return true; // just so it dun crash
     }
 
-    }
+    bool FindEnemy(int x, int y, int row, int col, int EnemyPlayer)
+    {
+        // searches inside of the field size, else it won't work.
+        if (x < 0 || y < 0 || x >= n || y >= n)
+        {
+            return false;
+        }
+
+        // check what stone is next to it
+        if (spelArray[x, y] == EnemyPlayer)
+        {
+            return true;
+        }
+        else 
+        {
+            return false;
+        }
+
+      /*  if (spelArray[x, y] != EnemyPlayer)
+        {
+            if (BadStone == true)
+            {
+                return false;
+            }
+
+            if (GoodStone)
+            {
+                PlaceStones(x, y, CurrentPlayer);
+            }
+            return true;
+        }   
+        else
+        {
+            if (spelArray[x, y] == 0)
+            {
+                return false;
+            }
+
+            x = x + row;
+            y = y + col;
+            
+            return FindEnemy(x, y, row, col, EnemyPlayer, GoodStone);
+      */
+        }
+        
+    }   
+    
+
+
+
+ 
 
 
 
