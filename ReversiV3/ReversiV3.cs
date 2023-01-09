@@ -250,13 +250,16 @@ class Speelbord : Form
                 {
                     pea.Graphics.FillEllipse(Brushes.Blue, i * 50, j * 50, 50, 50);
                 }
+                
+                else if (spelArray[i,j] == 0 && isLegalMove(i,j) == true)
+                {
+                    pea.Graphics.FillEllipse(Brushes.Green, (i * 50) , j * 50, 25, 25);
+                }
+                
             }
         }
 
-        if (ShowMeHelp() == true)
-        {
-            ;
-        }
+        
       
     }
     
