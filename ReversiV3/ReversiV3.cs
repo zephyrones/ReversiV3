@@ -25,7 +25,9 @@ class Speelbord : Form
     public int CountPlayerTwo;
 
     public int CurrentPlayer = 1;
-    public int EnemyPlayer = 2; 
+    public int EnemyPlayer = 2;
+
+    public bool HelpTurnOn = false;
     //  player 1 -> colour : red // false is rood
     //  player 2 -> colour : blue // true is blauw
 
@@ -75,6 +77,7 @@ class Speelbord : Form
         acht.Click += ButtonAcht;
         tien.Click += ButtonTien;
         nieuw_spel.Click += ButtonNieuwSpel;
+        help.Click += ButtonHelp;
         afbeelding.MouseClick += BoardPosition;
         afbeelding.Paint += TekenSpeelbord;
 
@@ -132,7 +135,8 @@ class Speelbord : Form
 
     void ButtonHelp(object o, EventArgs ea)
     {
-        
+        HelpTurnOn = !HelpTurnOn;
+        afbeelding.Invalidate();
     }
     public void SetArray() // n x n array
     {
@@ -182,8 +186,7 @@ class Speelbord : Form
             spelArray[x, y] = CurrentPlayer;
             PlaceStones(x + row, y + col, row, col); // places ston
         }
-        
-        
+     
     } 
 
     // Gets the position of the mouse to know where to place a stone.
@@ -251,9 +254,9 @@ class Speelbord : Form
                     pea.Graphics.FillEllipse(Brushes.Blue, i * 50, j * 50, 50, 50);
                 }
                 
-                else if (spelArray[i,j] == 0 && isLegalMove(i,j) == true)
+                else if (spelArray[i,j] == 0 && isLegalMove(i,j) == true && HelpTurnOn == true)
                 {
-                    pea.Graphics.FillEllipse(Brushes.Green, (i * 50) , j * 50, 25, 25);
+                    pea.Graphics.FillEllipse(Brushes.Green, i * 50 + (5/2*i), j * 50 + (3*j), 25, 25);
                 }
                 
             }
