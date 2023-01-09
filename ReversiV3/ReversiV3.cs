@@ -24,7 +24,7 @@ class Speelbord : Form
     public int CountPlayerOne;
     public int CountPlayerTwo;
     bool CurrentPlayer = false; //  player 1 -> colour : red // false is rood
-     //  player 2 -> colour : blue // true is blauw
+                                //  player 2 -> colour : blue // true is blauw
 
 
     public Speelbord()
@@ -63,7 +63,7 @@ class Speelbord : Form
         tien.Size = new Size(50, 30);
         tien.Text = "10x10";
 
-  
+
         #endregion
 
 
@@ -74,11 +74,11 @@ class Speelbord : Form
         nieuw_spel.Click += ButtonNieuwSpel;
         afbeelding.MouseClick += BoardPosition;
         afbeelding.Paint += TekenSpeelbord;
-   
+
         // afbeelding.Invalidate();
 
     }
-   
+
     void ButtonZes(object o, EventArgs ea)
     {
         n = 6;
@@ -118,13 +118,13 @@ class Speelbord : Form
         SetArray();
         // afbeelding.Invalidate();
     }
- 
+
     public void SetArray() // n x n array
     {
         spelArray = new int[n, n];
 
         // we make a zero-array as our starting point. 
-        for (int i = 0; i < n; i++) 
+        for (int i = 0; i < n; i++)
         {
             for (int j = 0; j < n; j++)
             {
@@ -149,7 +149,7 @@ class Speelbord : Form
     // Swaps who is currently playing. (review this laterrr)
     public void ChangePlayer()
     {
-        CurrentPlayer = !CurrentPlayer; 
+        CurrentPlayer = !CurrentPlayer;
     }
 
     public void PlaceStones(int x, int y, bool CurrentPlayer)
@@ -165,10 +165,11 @@ class Speelbord : Form
         int x = mea.X / 50;
         int y = mea.Y / 50;
 
-        if (isLegalMove(x, y, CurrentPlayer) == true)
+       if (isLegalMove(x, y, CurrentPlayer) == true)
             PlaceStones(x, y, CurrentPlayer);
         else
             Debug.WriteLine("DIT GEEFT DUS FALSE AAN HAHA");
+     
 
         // region just prints the values to console. 
         #region
@@ -229,7 +230,7 @@ class Speelbord : Form
          * one of your pieces next to it. 
          * we do this using if statements?
          */
-         
+
         // determine if the field is empty
         if (spelArray[x, y] != 0)
         {
@@ -239,32 +240,32 @@ class Speelbord : Form
         // determine which 'number' is your enemy
 
         int EnemyPlayer = CurrentPlayer ? 2 : 1;
-       
+
         Debug.WriteLine("This is current" + CurrentPlayer);
         Debug.WriteLine("This is enemy" + EnemyPlayer);
 
         // determine if you are placing your stone next to an enemy stone.
         for (int row = -1; row <= 1; row++)
-        {   
+        {
             for (int col = -1; col <= 1; col++)
             {
                 if (row == 0 && col == 0)
                     return false;
                 else
                     FindEnemy(x + row, y + col, row, col, EnemyPlayer);
-                    
+
             }
         }
 
         // determine if there is an enemy stone in each direction
-        
+
 
         // rn if u chose a field on the outer ring it says out of bounds so
         // fix that so it just says ok me no work then but no crash
         return true; // just so it dun crash
     }
 
-    bool FindEnemy(int x, int y, int row, int col, int EnemyPlayer)
+    bool FindEnemy(int x, int y, int row, int col, int EnemyPlayer, bool EnemyStone = false, bool YourStone = true)
     {
         // searches inside of the field size, else it won't work.
         if (x < 0 || y < 0 || x >= n || y >= n)
@@ -272,44 +273,40 @@ class Speelbord : Form
             return false;
         }
 
-        // check what stone is next to it
+        if (spelArray[x,y] == EnemyPlayer)
+        {
+            x = x + row;
+            y = y + col;
+            return FindPlayer(x, y, row, col, EnemyPlayer);
+        }
+        else
+
+        return true; // zodat ie niet piiept
+    }
+
+    bool FindPlayer(int x, int y, int row, int col, int EnemyPlayer)
+    {
         if (spelArray[x, y] == EnemyPlayer)
+        {
+            x = x + row;
+            y = y + col;
+            FindPlayer(x, y, row, col, EnemyPlayer);
+            return true;
+        }
+       
+        if (spelArray[x, y] != EnemyPlayer) 
         {
             return true;
         }
-        else 
+      else
         {
             return false;
         }
+      
+    }
 
-      /*  if (spelArray[x, y] != EnemyPlayer)
-        {
-            if (BadStone == true)
-            {
-                return false;
-            }
 
-            if (GoodStone)
-            {
-                PlaceStones(x, y, CurrentPlayer);
-            }
-            return true;
-        }   
-        else
-        {
-            if (spelArray[x, y] == 0)
-            {
-                return false;
-            }
-
-            x = x + row;
-            y = y + col;
-            
-            return FindEnemy(x, y, row, col, EnemyPlayer, GoodStone);
-      */
-        }
-        
-    }   
+}
     
 
 
