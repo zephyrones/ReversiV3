@@ -458,11 +458,6 @@ class Speelbord : Form
     {
         if (ShowMeHelp() == false) // Checks if player has possible moves, if not, turn passes.
         {
-            ChangePlayer(CurrentPlayer, EnemyPlayer);
-            if (ShowMeHelp() == false)  // If both players cannot move, game ends and shows result.
-                {
-                  return false;
-                }
             return false;
         }
         
