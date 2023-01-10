@@ -1,6 +1,5 @@
 using System;
 using System.Diagnostics;
-using System.Diagnostics.Metrics;
 using System.Drawing;
 using System.Windows.Forms;
 
@@ -36,9 +35,7 @@ class Speelbord : Form
     public bool HelpTurnOn = false;
 
     public string beurtstring;
-    //  player 1 -> colour : red // false is rood
-    //  player 2 -> colour : blue // true is blauw
-
+  
 
     public Speelbord()
     {
@@ -105,7 +102,6 @@ class Speelbord : Form
 
 
         SetArray();
-       // beurt.TextChanged += VeranderBeurtLabel;
         vier.Click += ButtonVier;
         zes.Click += ButtonZes;
         acht.Click += ButtonAcht;
@@ -117,9 +113,7 @@ class Speelbord : Form
         beurt.Invalidate();
         count1.Invalidate();
         count2.Invalidate();
-
-
-    }
+            }
 
     void ButtonVier(object o, EventArgs ea)
     {
@@ -217,7 +211,7 @@ class Speelbord : Form
         afbeelding.Invalidate();
     }
 
-    string CurrentTurn() // no work
+    string CurrentTurn() // Displays who's turn it is on a label.
     {
         if (CurrentPlayer == 1)
         {
@@ -234,13 +228,7 @@ class Speelbord : Form
         return beurtstring;
     }
 
-   /* void VeranderBeurtLabel(object o, EventArgs ea)
-    {
-        CurrentTurn();
-        beurt.Invalidate();
-    }*/
-
-    public void SetArray() // n x n array
+    public void SetArray() 
     {
         spelArray = new int[n, n];
 
@@ -264,27 +252,16 @@ class Speelbord : Form
         afbeelding.Invalidate();
     }
 
-    // Swaps who is currently playing. (review this laterrr)
+    // Swaps who is currently playing. 
     public void ChangePlayer(int CurrentPlayerT, int EnemyPlayerT)
     {
-        Counter();
-       
-        
-       
+        Counter(); // updates the label that counts the stones on the board per player.
         count1.Text = $"Rood heeft {CountPlayerOne} stenen";
         count2.Text = $"Blauw heeft {CountPlayerTwo} stenen";
-    
         count1.Invalidate();
         count2.Invalidate();
 
-        // region print stuff
-        #region
-        Debug.WriteLine("LOL");
-        Debug.WriteLine("Wie is er aan de beurt:" + beurtstring);
-        Debug.WriteLine("Count player 1:" + CountPlayerOne);
-        Debug.WriteLine("Count player 2:" + CountPlayerTwo);
-        Debug.WriteLine("Wat is winnaar" + Winner());
-        #endregion
+      // swaps players
         if (CurrentPlayer == 1)
         {
             CurrentPlayer = EnemyPlayer;
@@ -294,11 +271,14 @@ class Speelbord : Form
         {
             CurrentPlayer = 1;
         }
+
+        // updates who's turn it is and displays it on the label.
         CurrentTurn();
         beurt.Text = $"{CurrentTurn()} is aan de beurt";
         beurt.Invalidate();
     }
 
+    // draws the stones on the game field
     public void PlaceStones(int x, int y, int row, int col)
     {
 
@@ -318,13 +298,8 @@ class Speelbord : Form
         int x = mea.X / 50;
         int y = mea.Y / 50;
 
-        // region just prints the values to check . 
-        #region
-
-
        
-        #endregion
-        // dit runt wss niet vanaf de eerste beurt???????????????
+       // Checks if the player who's turn it is has any valid moves. And if so, places the stone.
         if (ValidMovesLeft() == true)
         {           
             if (isLegalMove(x, y))
@@ -332,14 +307,13 @@ class Speelbord : Form
                 spelArray[x, y] = CurrentPlayer;
                 EntrapmentFinder(x, y);
                 ChangePlayer(CurrentPlayer, EnemyPlayer);
-            
                 afbeelding.Invalidate();
                 this.Invalidate();
             }
         }
-        if (ShowMeHelp() == false)
+        if (ShowMeHelp() == false) // If there are no possible moves, it shows the winner. 
         {
-            MessageBox.Show(Winner());
+           MessageBox.Show(Winner());
         }
 
         afbeelding.Invalidate();
@@ -361,7 +335,7 @@ class Speelbord : Form
             }
         }
 
-        for (int i = 0; i < n; i++) // places the stones in position
+        for (int i = 0; i < n; i++) // finds the location in the array
         {
             for (int j = 0; j < n; j++)
             {
@@ -374,7 +348,8 @@ class Speelbord : Form
                     pea.Graphics.FillEllipse(Brushes.Blue, i * 50, j * 50, 50, 50);
                 }
 
-                else if (spelArray[i, j] == 0 && isLegalMove(i, j) == true && HelpTurnOn == true)
+                // draws the stones on the possible moves for the help function.
+                else if (spelArray[i, j] == 0 && isLegalMove(i, j) == true && HelpTurnOn == true) 
                 {
                     pea.Graphics.FillEllipse(Brushes.Green, i * 50 + (5 / 2 * i), j * 50 + (3 * j), 25, 25);
                 }
@@ -383,7 +358,8 @@ class Speelbord : Form
         }
     }
 
-    bool isLegalMove(int x, int y) // needs reviewing 
+    // checks if the player can make a move.
+    bool isLegalMove(int x, int y) 
     {
 
         if (spelArray[x, y] != 0) // if there is a stone on the board you cannot place another stone.
@@ -416,11 +392,11 @@ class Speelbord : Form
         if (spelArray[x, y] == CurrentPlayer) // Returns false if your own stone is right next to you.
         {
             {
-                if (BadStone == true) // 
+                if (BadStone == true) // If there is no enemy stone next to you and returns false.
                     return false;
             }
 
-            if (PlayStone) // There is an enemy stone there.
+            if (PlayStone) // If there is an enemy stone it can place it
             {
                 PlaceStones(-1 * row + x, -1 * col + y, -1 * row, -1 * col);
             }
@@ -441,6 +417,7 @@ class Speelbord : Form
         }
     }
 
+    // Finds all legal moves so we can draw the help circles.
     public bool ShowMeHelp()
     {
         for (int r = 0; r < n; r++)
@@ -476,19 +453,17 @@ class Speelbord : Form
             }
     }
 
+   
     public bool ValidMovesLeft() 
     {
         if (ShowMeHelp() == false) // Checks if player has possible moves, if not, turn passes.
         {
-            ChangePlayer(EnemyPlayer, CurrentPlayer);
-            {
-                if (ShowMeHelp() == false)  // If both players cannot move, game ends and shows result.
+            ChangePlayer(CurrentPlayer, EnemyPlayer);
+            if (ShowMeHelp() == false)  // If both players cannot move, game ends and shows result.
                 {
-                    MessageBox.Show(Winner());
-                    return false;
+                  return false;
                 }
-            }
-            return true;
+            return false;
         }
         
         else
@@ -498,6 +473,7 @@ class Speelbord : Form
        
     }
 
+    // Compares the two stone counters and decides who won.
     public string Winner()
     {
         string winnaar;
