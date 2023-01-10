@@ -22,12 +22,13 @@ class Speelbord : Form
 
     public Button help = new Button();
     public Button nieuw_spel = new Button();
+    public Button vier = new Button();
     public Button zes = new Button();
     public Button acht = new Button();
     public Button tien = new Button();
 
-    public int CountPlayerOne;
-    public int CountPlayerTwo;
+    public int CountPlayerOne = 2;
+    public int CountPlayerTwo = 2;
 
     public int CurrentPlayer = 1;
     public int EnemyPlayer = 2;
@@ -61,7 +62,7 @@ class Speelbord : Form
         beurt.Location = new Point(200, 10);
         beurt.Size = new Size(100, 50);
         beurt.BackColor = Color.LightGray;
-        beurt.Text = $"{Kleur()} is aan de beurt";
+        beurt.Text = $"{CurrentTurn()} is aan de beurt";
 
         Controls.Add(count1);
         count1.Location = new Point(350, 10);
@@ -69,7 +70,7 @@ class Speelbord : Form
         count1.BackColor = Color.LightGray;
         count1.Text = $"Rood heeft {CountPlayerOne} stenen";
 
-          Controls.Add(count2);
+        Controls.Add(count2);
         count2.Location = new Point(450, 10);
         count2.Size = new Size(100, 50);
         count2.BackColor = Color.LightGray;
@@ -79,6 +80,11 @@ class Speelbord : Form
 
         // region = buttons! 
         #region
+        Controls.Add(vier);
+        vier.Location = new Point(160, 50);
+        vier.Size = new Size(50, 30);
+        vier.Text = "4x4";
+
         Controls.Add(zes);
         zes.Location = new Point(10, 50);
         zes.Size = new Size(50, 30);
@@ -100,6 +106,7 @@ class Speelbord : Form
 
         SetArray();
         beurt.TextChanged += VeranderBeurtLabel;
+        vier.Click += ButtonVier;
         zes.Click += ButtonZes;
         acht.Click += ButtonAcht;
         tien.Click += ButtonTien;
@@ -107,8 +114,20 @@ class Speelbord : Form
         help.Click += ButtonHelp;
         afbeelding.MouseClick += BoardPosition;
         afbeelding.Paint += TekenSpeelbord;
-       
 
+    }
+
+    void ButtonVier(object o, EventArgs ea)
+    {
+        n = 4;
+        BoardX = n * 50 + 1;
+        BoardY = n * 50 + 1;
+        Midden_x = 100;
+        Midden_y = 100;
+        CurrentPlayer = 1;
+        EnemyPlayer = 2;
+        afbeelding.Size = new Size(BoardX, BoardY);
+        SetArray();
     }
 
     void ButtonZes(object o, EventArgs ea)
@@ -161,7 +180,7 @@ class Speelbord : Form
         EnemyPlayer = 2;
         SetArray();
         // afbeelding.Invalidate();
-        
+
     }
 
     void ButtonHelp(object o, EventArgs ea)
@@ -170,7 +189,7 @@ class Speelbord : Form
         afbeelding.Invalidate();
     }
 
-    string Kleur()
+    string CurrentTurn()
     {
         if (CurrentPlayer == 1)
         {
@@ -196,7 +215,7 @@ class Speelbord : Form
 
     void VeranderBeurtLabel(object o, EventArgs ea)
     {
-        Kleur();
+        CurrentTurn();
         beurt.Invalidate();
     }
 
@@ -220,12 +239,6 @@ class Speelbord : Form
         spelArray[n / 2, n / 2 - 1] = 2;
 
 
-        // Counts the starting stones on the board.
-        CountPlayerOne = 2;
-        CountPlayerTwo = 2;
-
-        count1.Invalidate();
-        count2.Invalidate();
         afbeelding.Invalidate();
     }
 
@@ -235,11 +248,11 @@ class Speelbord : Form
         if (CurrentPlayer == 1)
         {
             CurrentPlayer = EnemyPlayer;
-         
+
         }
         else if (CurrentPlayer == 2)
         {
-            CurrentPlayer = 1;   
+            CurrentPlayer = 1;
         }
     }
 
@@ -266,26 +279,30 @@ class Speelbord : Form
         #region
         // prints the value of x and y on console to see if they are correct for the array.
         Debug.WriteLine($"Value of spelArray[x,y]: {spelArray[x, y]}");
-        Debug.WriteLine("wat gebeurt hier:" + beurtstring);
-        Debug.WriteLine($"This is x: {x}");
-        Debug.WriteLine($"This is y: {y}");
-
-        for (int i = 0; i < n; i++) // just prints every value in the array to check what happens
-        {
-            for (int j = 0; j < n; j++)
-            {
-                Debug.WriteLine($"This is je value for {i} and {j}: {spelArray[i, j]}");
-            }
-        }
+        Debug.WriteLine("Wie is er aan de beurt:" + beurtstring);
+        Debug.WriteLine("Count player 1:" + CountPlayerOne);
+        Debug.WriteLine("Count player 2:" + CountPlayerTwo);
+        Debug.WriteLine("Wat is winnaar" + Winner());
+           
+     
         #endregion
 
-        if (isLegalMove(x, y))
+        if (ValidMovesLeft() == true)
         {
-            spelArray[x, y] = CurrentPlayer;
-            EntrapmentFinder(x, y);
-            ChangePlayer(CurrentPlayer, EnemyPlayer);
-            afbeelding.Invalidate();
+            if (isLegalMove(x, y))
+            {
+                spelArray[x, y] = CurrentPlayer;
+                EntrapmentFinder(x, y);
+                Counter();
+                ChangePlayer(CurrentPlayer, EnemyPlayer);
+                afbeelding.Invalidate();
+            }
         }
+        else
+        {
+            MessageBox.Show(Winner());
+        }
+
         afbeelding.Invalidate();
     }
 
@@ -338,7 +355,6 @@ class Speelbord : Form
                     if (FindEnemy(x + row, y + col, row, col))
                         return true;
         return false;
-
     }
 
     // Finds the stones that are entrapped and flips them to the correct color.
@@ -357,7 +373,6 @@ class Speelbord : Form
         {
             return false;
         }
-
 
         if (spelArray[x, y] == CurrentPlayer) // Returns false if your own stone is right next to you.
         {
@@ -400,25 +415,69 @@ class Speelbord : Form
         return false;
     }
 
-    public int Counter()
+    public void Counter()
     {
         for (int i = 0; i < n; i++) // places the stones in position
             for (int j = 0; j < n; j++)
             {
                 if (spelArray[i, j] == 1)
                 {
-                    return CountPlayerOne++;
+                    CountPlayerOne++;
+
                 }
 
-                if (spelArray[i, j] == 2)
+                else if (spelArray[i, j] == 2)
                 {
-                    return CountPlayerTwo++;
+                    CountPlayerTwo++;
                 }
-                }
-        return 0;
+            }
     }
+
+    public bool ValidMovesLeft() 
+    {
+        if (ShowMeHelp() == false) // Checks if player has possible moves, if not, turn passes.
+        {
+            {
+             ChangePlayer(CurrentPlayer, EnemyPlayer);
+            }
+            if (ShowMeHelp() == false)  // If both players cannot move, game ends and shows result.
+            {
+                return false;
+            }
+            return true;
+        }
         
-     
+        else
+        {
+            return true;
+        }
+       
+    }
+
+    public string Winner()
+    {
+        string winnaar;
+
+        if (CountPlayerOne > CountPlayerTwo)
+        {
+            winnaar = "Rood heeft gewonnen!";
+            return winnaar;
+        }
+        else if (CountPlayerOne < CountPlayerTwo)
+        {
+            winnaar = "Blauw heeft gewonnen!";
+            return winnaar;
+        }
+         else 
+        {
+            winnaar = "Remise!";
+            return winnaar;
+        }
+    }
+
+
+
+
 }
 
 
