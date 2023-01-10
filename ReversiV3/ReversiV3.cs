@@ -1,5 +1,6 @@
 using System;
 using System.Diagnostics;
+using System.Diagnostics.Metrics;
 using System.Drawing;
 using System.Windows.Forms;
 
@@ -7,14 +8,18 @@ Application.Run(new Speelbord());
 
 class Speelbord : Form
 {
-    public int Midden_x = 200; // midden van het label (voor 6x6 is dat 300/2)
-    public int Midden_y = 200;
-    public int n = 8; // sets the size of the field (make this variable later!!)
+    public int Midden_x = 150; // midden van het label (voor 6x6 is dat 300/2)
+    public int Midden_y = 150;
+    public int n = 6; // sets the size of the field (make this variable later!!)
     public int[,] spelArray; // makes the array
-    public int BoardX = 401;
-    public int BoardY = 401;
+    public int BoardX = 301;
+    public int BoardY = 301;
 
     public Label afbeelding = new Label();
+    public Label beurt = new Label();
+    public Label count1 = new Label();
+    public Label count2 = new Label();
+
     public Button help = new Button();
     public Button nieuw_spel = new Button();
     public Button zes = new Button();
@@ -28,6 +33,8 @@ class Speelbord : Form
     public int EnemyPlayer = 2;
 
     public bool HelpTurnOn = false;
+
+    public string beurtstring;
     //  player 1 -> colour : red // false is rood
     //  player 2 -> colour : blue // true is blauw
 
@@ -49,6 +56,25 @@ class Speelbord : Form
         nieuw_spel.Location = new Point(60, 10);
         nieuw_spel.Size = new Size(80, 30);
         nieuw_spel.Text = "Nieuw spel";
+
+        Controls.Add(beurt);
+        beurt.Location = new Point(200, 10);
+        beurt.Size = new Size(100, 50);
+        beurt.BackColor = Color.LightGray;
+        beurt.Text = $"{Kleur()} is aan de beurt";
+
+        Controls.Add(count1);
+        count1.Location = new Point(350, 10);
+        count1.Size = new Size(100, 50);
+        count1.BackColor = Color.LightGray;
+        count1.Text = $"Rood heeft {CountPlayerOne} stenen";
+
+          Controls.Add(count2);
+        count2.Location = new Point(450, 10);
+        count2.Size = new Size(100, 50);
+        count2.BackColor = Color.LightGray;
+        count2.Text = $"Blauw heeft {CountPlayerTwo} stenen";
+
         #endregion
 
         // region = buttons! 
@@ -73,6 +99,7 @@ class Speelbord : Form
 
 
         SetArray();
+        beurt.TextChanged += VeranderBeurtLabel;
         zes.Click += ButtonZes;
         acht.Click += ButtonAcht;
         tien.Click += ButtonTien;
@@ -80,8 +107,7 @@ class Speelbord : Form
         help.Click += ButtonHelp;
         afbeelding.MouseClick += BoardPosition;
         afbeelding.Paint += TekenSpeelbord;
-
-        // afbeelding.Invalidate();
+       
 
     }
 
@@ -96,7 +122,6 @@ class Speelbord : Form
         EnemyPlayer = 2;
         afbeelding.Size = new Size(BoardX, BoardY);
         SetArray();
-
     }
 
     void ButtonAcht(object o, EventArgs ea)
@@ -127,10 +152,16 @@ class Speelbord : Form
 
     void ButtonNieuwSpel(object o, EventArgs ea)
     {
+        n = 6;
+        BoardX = n * 50 + 1;
+        BoardY = n * 50 + 1;
+        Midden_x = 150;
+        Midden_y = 150;
         CurrentPlayer = 1;
         EnemyPlayer = 2;
         SetArray();
         // afbeelding.Invalidate();
+        
     }
 
     void ButtonHelp(object o, EventArgs ea)
@@ -138,6 +169,37 @@ class Speelbord : Form
         HelpTurnOn = !HelpTurnOn;
         afbeelding.Invalidate();
     }
+
+    string Kleur()
+    {
+        if (CurrentPlayer == 1)
+        {
+            beurtstring = "Rood";
+            beurt.Invalidate();
+            return beurtstring;
+        }
+
+        else if (CurrentPlayer == 2)
+        {
+            beurtstring = "Blauw";
+            beurt.Invalidate();
+            return beurtstring;
+        }
+
+        else
+        {
+            beurtstring = "Niemand";
+            return beurtstring;
+        }
+
+    }
+
+    void VeranderBeurtLabel(object o, EventArgs ea)
+    {
+        Kleur();
+        beurt.Invalidate();
+    }
+
     public void SetArray() // n x n array
     {
         spelArray = new int[n, n];
@@ -162,32 +224,35 @@ class Speelbord : Form
         CountPlayerOne = 2;
         CountPlayerTwo = 2;
 
+        count1.Invalidate();
+        count2.Invalidate();
         afbeelding.Invalidate();
     }
 
     // Swaps who is currently playing. (review this laterrr)
     public void ChangePlayer(int CurrentPlayerT, int EnemyPlayerT)
     {
-       if (CurrentPlayer == 1)
+        if (CurrentPlayer == 1)
         {
             CurrentPlayer = EnemyPlayer;
+         
         }
-       else if (CurrentPlayer == 2)
+        else if (CurrentPlayer == 2)
         {
-            CurrentPlayer = 1;
+            CurrentPlayer = 1;   
         }
     }
 
     public void PlaceStones(int x, int y, int row, int col)
     {
-   
-        if (spelArray[x,y] != CurrentPlayer) // Checks if the place isn't already occupied by the player.
+
+        if (spelArray[x, y] != CurrentPlayer) // Checks if the place isn't already occupied by the player.
         {
             spelArray[x, y] = CurrentPlayer;
-            PlaceStones(x + row, y + col, row, col); // places ston
+            PlaceStones(x + row, y + col, row, col); // places stone
         }
-     
-    } 
+
+    }
 
     // Gets the position of the mouse to know where to place a stone.
     public void BoardPosition(object sender, MouseEventArgs mea)
@@ -201,6 +266,7 @@ class Speelbord : Form
         #region
         // prints the value of x and y on console to see if they are correct for the array.
         Debug.WriteLine($"Value of spelArray[x,y]: {spelArray[x, y]}");
+        Debug.WriteLine("wat gebeurt hier:" + beurtstring);
         Debug.WriteLine($"This is x: {x}");
         Debug.WriteLine($"This is y: {y}");
 
@@ -215,13 +281,11 @@ class Speelbord : Form
 
         if (isLegalMove(x, y))
         {
-            spelArray[x,y] = CurrentPlayer;
+            spelArray[x, y] = CurrentPlayer;
             EntrapmentFinder(x, y);
             ChangePlayer(CurrentPlayer, EnemyPlayer);
             afbeelding.Invalidate();
         }
-
-      
         afbeelding.Invalidate();
     }
 
@@ -253,21 +317,18 @@ class Speelbord : Form
                 {
                     pea.Graphics.FillEllipse(Brushes.Blue, i * 50, j * 50, 50, 50);
                 }
-                
-                else if (spelArray[i,j] == 0 && isLegalMove(i,j) == true && HelpTurnOn == true)
+
+                else if (spelArray[i, j] == 0 && isLegalMove(i, j) == true && HelpTurnOn == true)
                 {
-                    pea.Graphics.FillEllipse(Brushes.Green, i * 50 + (5/2*i), j * 50 + (3*j), 25, 25);
+                    pea.Graphics.FillEllipse(Brushes.Green, i * 50 + (5 / 2 * i), j * 50 + (3 * j), 25, 25);
                 }
-                
+
             }
         }
-
-        
-      
     }
-    
+
     bool isLegalMove(int x, int y) // needs reviewing 
-    { 
+    {
 
         if (spelArray[x, y] != 0) // if there is a stone on the board you cannot place another stone.
             return false;
@@ -286,7 +347,7 @@ class Speelbord : Form
         for (int row = -1; row <= 1; row++)
             for (int col = -1; col <= 1; col++)
                 if (!(row == 0 && col == 0))
-                   FindEnemy(x + row, y + col, row, col, true);
+                    FindEnemy(x + row, y + col, row, col, true);
     }
 
     bool FindEnemy(int x, int y, int row, int col, bool PlayStone = false, bool BadStone = true)
@@ -297,7 +358,7 @@ class Speelbord : Form
             return false;
         }
 
-       
+
         if (spelArray[x, y] == CurrentPlayer) // Returns false if your own stone is right next to you.
         {
             {
@@ -317,10 +378,10 @@ class Speelbord : Form
             {
                 return false;
             }
-            
+
             // Checks the next space if there is an enemy stone next to you.
             x = x + row;
-            y = y  + col;
+            y = y + col;
 
             return FindEnemy(x, y, row, col, PlayStone, false);
         }
@@ -331,17 +392,38 @@ class Speelbord : Form
         for (int r = 0; r < n; r++)
             for (int c = 0; c < n; c++)
                 if (spelArray[r, c] == 0)
-                { 
+                {
                     isLegalMove(r, c);
-                     return true;
+                    return true;
                 }
-                
+
         return false;
     }
-}
-    
 
- 
+    public int Counter()
+    {
+        for (int i = 0; i < n; i++) // places the stones in position
+            for (int j = 0; j < n; j++)
+            {
+                if (spelArray[i, j] == 1)
+                {
+                    return CountPlayerOne++;
+                }
+
+                if (spelArray[i, j] == 2)
+                {
+                    return CountPlayerTwo++;
+                }
+                }
+        return 0;
+    }
+        
+     
+}
+
+
+
+
 
 
 
